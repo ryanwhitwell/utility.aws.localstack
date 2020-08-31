@@ -1,0 +1,37 @@
+version: '3.5'
+
+services:
+  localstack-events:
+    container_name: localstack-myproduct
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE=myproduct #This value is passed into the provisioning script
+      - LOCALSTACK_HOST=localstack
+    networks:
+      - local
+    command: scripts/provision-localstack.sh
+  localstack:
+    image: localstack/localstack:0.9.0
+    container_name: localstack
+    privileged: true
+    ports:
+      - "4567-4584:4567-4584"
+      - "8080:8080"
+    environment:
+      - SERVICES=${SERVICES- }
+      - DEBUG=${DEBUG- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOSTNAME=localstack
+      - HOSTNAME_EXTERNAL=localstack
+    networks:
+      - local
+volumes:
+  localstack-vol: #declare the volume for the compose file
+networks:
+  local:
+    name: localstacknetwork
